@@ -1,0 +1,20 @@
+{
+  "alarm_basic": {
+    "subtitle": "subtitles.create_alerted.alarm_basic",
+    "sounds": [
+      "create_alerted:alarm_basic"
+    ]
+  },
+  "alarm_annoying": {
+    "subtitle": "subtitles.create_alerted.alarm_annoying",
+    "sounds": [
+      "create_alerted:alarm_annoying"
+    ]
+  },
+  "alarm_buzz": {
+    "subtitle": "subtitles.create_alerted.alarm_buzz",
+    "sounds": [
+      "create_alerted:alarm_buzz"
+    ]
+  }
+}
