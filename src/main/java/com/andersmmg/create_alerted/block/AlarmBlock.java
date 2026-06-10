@@ -2,31 +2,44 @@ package com.andersmmg.create_alerted.block;
 
 import com.andersmmg.create_alerted.Config;
 import com.andersmmg.create_alerted.integration.SableCompat;
+import com.andersmmg.create_alerted.menu.AlarmMenu;
+import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AlarmBlock extends Block {
+public abstract class AlarmBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-    public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    public static final BooleanProperty CAGE = BooleanProperty.create("cage");
 
     private static final VoxelShape SHAPE_UP = Block.box(5, 0, 5, 11, 8, 11);
     private static final VoxelShape SHAPE_DOWN = Block.box(5, 8, 5, 11, 16, 11);
@@ -40,7 +53,7 @@ public abstract class AlarmBlock extends Block {
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.UP)
                 .setValue(POWERED, false)
-                .setValue(LIT, false));
+                .setValue(CAGE, false));
     }
 
     public abstract SoundEvent getAlarmSound();
@@ -49,7 +62,7 @@ public abstract class AlarmBlock extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, POWERED, LIT);
+        builder.add(FACING, POWERED, CAGE);
     }
 
     @Nullable
@@ -61,7 +74,7 @@ public abstract class AlarmBlock extends Block {
             BlockState state = defaultBlockState().setValue(FACING, dir.getOpposite());
             if (state.canSurvive(level, pos)) {
                 boolean powered = level.hasNeighborSignal(pos);
-                return state.setValue(POWERED, powered).setValue(LIT, powered);
+                return state.setValue(POWERED, powered);
             }
         }
         return null;
@@ -82,9 +95,9 @@ public abstract class AlarmBlock extends Block {
                 level.destroyBlock(pos, true);
                 return;
             }
-            boolean powered = level.hasNeighborSignal(pos);
+            boolean powered = shouldBePowered(level, pos);
             if (powered != state.getValue(POWERED)) {
-                level.setBlock(pos, state.setValue(POWERED, powered).setValue(LIT, powered), 3);
+                level.setBlock(pos, state.setValue(POWERED, powered), 3);
                 if (powered) {
                     scheduleSoundTick(level, pos);
                 }
@@ -95,8 +108,13 @@ public abstract class AlarmBlock extends Block {
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        if (!level.isClientSide && state.getValue(POWERED)) {
-            scheduleSoundTick(level, pos);
+        if (!level.isClientSide) {
+            if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+                be.registerNetwork();
+            }
+            if (state.getValue(POWERED)) {
+                scheduleSoundTick(level, pos);
+            }
         }
     }
 
@@ -121,7 +139,56 @@ public abstract class AlarmBlock extends Block {
         };
     }
 
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof WrenchItem && !player.isShiftKeyDown()) {
+            if (!level.isClientSide) {
+                level.setBlock(pos, state.cycle(CAGE), 3);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+        if (openMenu(state, level, pos, player)) return ItemInteractionResult.SUCCESS;
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (openMenu(state, level, pos, player)) return InteractionResult.SUCCESS;
+        return super.useWithoutItem(state, level, pos, player, hitResult);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new AlarmBlockEntity(pos, state);
+    }
+
+    private boolean openMenu(BlockState state, Level level, BlockPos pos, Player player) {
+        if (!player.isShiftKeyDown()) return false;
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+            player.openMenu(new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return state.getBlock().getName();
+                }
+
+                @Nullable
+                @Override
+                public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+                    return new AlarmMenu(containerId, inventory, be);
+                }
+            }, pos);
+        }
+        return true;
+    }
+
     private void scheduleSoundTick(Level level, BlockPos pos) {
         level.scheduleTick(pos, this, getSoundInterval());
+    }
+
+    private boolean shouldBePowered(Level level, BlockPos pos) {
+        if (level.hasNeighborSignal(pos)) return true;
+        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be && be.getReceivedSignal() > 0) return true;
+        return false;
     }
 }

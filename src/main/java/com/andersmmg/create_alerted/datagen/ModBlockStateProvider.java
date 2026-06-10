@@ -3,6 +3,7 @@ package com.andersmmg.create_alerted.datagen;
 import com.andersmmg.create_alerted.Create_alerted;
 import com.andersmmg.create_alerted.block.AlarmBlock;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
@@ -23,13 +24,34 @@ public class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void alarmBlock(Block block) {
-        ModelFile offModel = models().getExistingFile(modLoc("block/alarm_off"));
-        ModelFile onModel = models().getExistingFile(modLoc("block/alarm_on"));
+        String name = BuiltInRegistries.BLOCK.getKey(block).getPath();
+
+        ModelFile offPlain = models().withExistingParent("block/" + name + "_off_plain", modLoc("block/templates/alarm_plain"))
+                .renderType("minecraft:cutout");
+        ModelFile offCaged = models().withExistingParent("block/" + name + "_off_caged", modLoc("block/templates/alarm_cage"))
+                .renderType("minecraft:cutout");
+        ModelFile onPlain = models().withExistingParent("block/" + name + "_on_plain", modLoc("block/templates/alarm_plain"))
+                .renderType("minecraft:cutout")
+                .texture("lamp", modLoc("block/light_redstone"))
+                .texture("particle", modLoc("block/light_redstone"));
+        ModelFile onCaged = models().withExistingParent("block/" + name + "_on_caged", modLoc("block/templates/alarm_cage"))
+                .renderType("minecraft:cutout")
+                .texture("lamp", modLoc("block/light_redstone"))
+                .texture("particle", modLoc("block/light_redstone"));
 
         getVariantBuilder(block)
                 .forAllStates(state -> {
                     Direction facing = state.getValue(AlarmBlock.FACING);
-                    boolean lit = state.getValue(AlarmBlock.LIT);
+                    boolean powered = state.getValue(AlarmBlock.POWERED);
+                    boolean caged = state.getValue(AlarmBlock.CAGE);
+
+                    ModelFile model;
+                    if (caged) {
+                        model = powered ? onCaged : offCaged;
+                    } else {
+                        model = powered ? onPlain : offPlain;
+                    }
+
                     int x = switch (facing) {
                         case DOWN -> 180;
                         case NORTH, SOUTH, WEST, EAST -> 90;
@@ -43,7 +65,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
                         default -> 0;
                     };
                     return ConfiguredModel.builder()
-                            .modelFile(lit ? onModel : offModel)
+                            .modelFile(model)
                             .rotationX(x)
                             .rotationY(y)
                             .build();

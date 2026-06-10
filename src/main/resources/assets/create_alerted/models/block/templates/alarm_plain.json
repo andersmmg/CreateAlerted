@@ -1,0 +1,239 @@
+{
+  "format_version": "1.21.11",
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "create_alerted:block/light_redstone_off",
+    "lamp": "create_alerted:block/light_redstone_off",
+    "cage": "create_alerted:block/brass_lamp"
+  },
+  "render_type": "minecraft:cutout",
+  "elements": [
+    {
+      "name": "base",
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        2,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10,
+            6,
+            16,
+            8
+          ],
+          "texture": "#cage"
+        },
+        "east": {
+          "uv": [
+            10,
+            6,
+            16,
+            8
+          ],
+          "texture": "#cage"
+        },
+        "south": {
+          "uv": [
+            10,
+            6,
+            16,
+            8
+          ],
+          "texture": "#cage"
+        },
+        "west": {
+          "uv": [
+            10,
+            6,
+            16,
+            8
+          ],
+          "texture": "#cage"
+        },
+        "up": {
+          "uv": [
+            10,
+            0,
+            16,
+            6
+          ],
+          "texture": "#cage"
+        },
+        "down": {
+          "uv": [
+            10,
+            0,
+            16,
+            6
+          ],
+          "texture": "#cage"
+        }
+      }
+    },
+    {
+      "name": "light",
+      "from": [
+        6,
+        2,
+        6
+      ],
+      "to": [
+        10,
+        7,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            4,
+            4,
+            9
+          ],
+          "texture": "#lamp"
+        },
+        "east": {
+          "uv": [
+            0,
+            4,
+            4,
+            9
+          ],
+          "texture": "#lamp"
+        },
+        "south": {
+          "uv": [
+            0,
+            4,
+            4,
+            9
+          ],
+          "texture": "#lamp"
+        },
+        "west": {
+          "uv": [
+            0,
+            4,
+            4,
+            9
+          ],
+          "rotation": 180,
+          "texture": "#lamp"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#lamp"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#lamp"
+        }
+      }
+    }
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        15,
+        45,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        15,
+        45,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        -10,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        5.5,
+        0
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        -10,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        5.5,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "gui": {
+      "rotation": [
+        35.3,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        4.25,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    "head": {
+      "translation": [
+        0,
+        14.5,
+        0
+      ]
+    },
+    "fixed": {
+      "translation": [
+        0,
+        4,
+        -2
+      ]
+    }
+  }
+}
