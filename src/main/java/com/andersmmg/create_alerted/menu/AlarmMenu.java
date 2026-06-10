@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class AlarmMenu extends AbstractContainerMenu {
     private static final Container DUMMY_CONTAINER = new SimpleContainer(1);
@@ -74,22 +75,22 @@ public class AlarmMenu extends AbstractContainerMenu {
         }
 
         @Override
-        public ItemStack getItem() {
+        public @NotNull ItemStack getItem() {
             return first ? blockEntity.getFrequencyFirst() : blockEntity.getFrequencyLast();
         }
 
         @Override
-        public boolean mayPlace(ItemStack stack) {
+        public boolean mayPlace(@NotNull ItemStack stack) {
             return true;
         }
 
         @Override
-        public void setByPlayer(ItemStack stack) {
+        public void setByPlayer(@NotNull ItemStack stack) {
             blockEntity.setFrequency(first, stack);
         }
 
         @Override
-        public void set(ItemStack stack) {
+        public void set(@NotNull ItemStack stack) {
             blockEntity.setFrequency(first, stack);
         }
 
@@ -98,12 +99,12 @@ public class AlarmMenu extends AbstractContainerMenu {
         }
 
         @Override
-        public boolean mayPickup(Player player) {
+        public boolean mayPickup(@NotNull Player player) {
             return false;
         }
 
         @Override
-        public ItemStack remove(int amount) {
+        public @NotNull ItemStack remove(int amount) {
             return ItemStack.EMPTY;
         }
     }

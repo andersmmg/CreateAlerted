@@ -34,6 +34,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AlarmBlock extends Block implements EntityBlock {
@@ -128,7 +129,7 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    protected @NotNull VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return switch (state.getValue(FACING)) {
             case DOWN -> SHAPE_DOWN;
             case NORTH -> SHAPE_NORTH;
@@ -172,9 +173,8 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
                     return state.getBlock().getName();
                 }
 
-                @Nullable
                 @Override
-                public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+                public @NotNull AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
                     return new AlarmMenu(containerId, inventory, be);
                 }
             }, pos);
@@ -188,7 +188,6 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
 
     private boolean shouldBePowered(Level level, BlockPos pos) {
         if (level.hasNeighborSignal(pos)) return true;
-        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be && be.getReceivedSignal() > 0) return true;
-        return false;
+        return level.getBlockEntity(pos) instanceof AlarmBlockEntity be && be.getReceivedSignal() > 0;
     }
 }

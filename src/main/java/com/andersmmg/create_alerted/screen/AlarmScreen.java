@@ -41,8 +41,9 @@ public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
     }
 
     @Override
-    protected void slotClicked(Slot slot, int slotIndex, int mouseButton, ClickType type) {
+    protected void slotClicked(@NotNull Slot slot, int slotIndex, int mouseButton, @NotNull ClickType type) {
         if (slotIndex >= 0 && slotIndex <= 1 && type == ClickType.PICKUP) {
+            assert getMinecraft().player != null;
             var cursorStack = getMinecraft().player.containerMenu.getCarried();
             boolean isFirst = (slotIndex == 0);
 

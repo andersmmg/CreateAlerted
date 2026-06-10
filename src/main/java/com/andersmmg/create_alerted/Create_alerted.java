@@ -37,6 +37,9 @@ public class Create_alerted {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
 
+    private static final BlockBehaviour.Properties ALARM_PROPERTIES = BlockBehaviour.Properties.of()
+            .strength(3.0f).requiresCorrectToolForDrops().noOcclusion()
+            .lightLevel(state -> state.getValue(AlarmBlock.POWERED) ? 7 : 0);
     public static final DeferredBlock<BasicAlarmBlock> BASIC_ALARM_BLOCK = BLOCKS.registerBlock("alarm_basic",
             BasicAlarmBlock::new,
             ALARM_PROPERTIES);
@@ -62,9 +65,6 @@ public class Create_alerted {
                             ANNOYING_ALARM_BLOCK.get(),
                             BUZZ_ALARM_BLOCK.get()
                     ).build(null));
-    private static final BlockBehaviour.Properties ALARM_PROPERTIES = BlockBehaviour.Properties.of()
-            .strength(3.0f).requiresCorrectToolForDrops().noOcclusion()
-            .lightLevel(state -> state.getValue(AlarmBlock.POWERED) ? 7 : 0);
     public Create_alerted(IEventBus modEventBus, ModContainer modContainer) {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);

@@ -8,6 +8,7 @@ import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class ModLootTableProvider extends LootTableProvider {
         }
 
         @Override
-        protected Iterable<Block> getKnownBlocks() {
+        protected @NotNull Iterable<Block> getKnownBlocks() {
             return List.of(
                     Create_alerted.BASIC_ALARM_BLOCK.get(),
                     Create_alerted.ANNOYING_ALARM_BLOCK.get(),

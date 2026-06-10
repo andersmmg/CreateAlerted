@@ -1,7 +1,6 @@
 package com.andersmmg.create_alerted.integration;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,7 +44,4 @@ public class SableCompat {
         }
     }
 
-    public static boolean isInsideSubLevel(Level level, BlockPos pos) {
-        return Math.abs(pos.getX()) > 1000000 || Math.abs(pos.getZ()) > 1000000;
-    }
 }
