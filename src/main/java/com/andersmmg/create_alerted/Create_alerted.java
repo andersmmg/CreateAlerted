@@ -16,6 +16,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -27,6 +28,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.slf4j.LoggerFactory;
 
 @Mod(Create_alerted.MODID)
 public class Create_alerted {
@@ -78,6 +80,7 @@ public class Create_alerted {
         modEventBus.addListener(this::registerPayload);
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::registerScreens);
+        modEventBus.addListener(this::registerRenderers);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
@@ -85,6 +88,11 @@ public class Create_alerted {
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
+    }
+
+    private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        LoggerFactory.getLogger("CreateAlerted").info("Registering alarm BER for block entity type: {}", ALARM_BLOCK_ENTITY.get());
+        event.registerBlockEntityRenderer(ALARM_BLOCK_ENTITY.get(), AlarmBlockEntityRenderer::new);
     }
 
     private void registerScreens(RegisterMenuScreensEvent event) {
