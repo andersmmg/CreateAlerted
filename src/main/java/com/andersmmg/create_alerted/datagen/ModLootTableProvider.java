@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.datagen;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -26,17 +26,17 @@ public class ModLootTableProvider extends LootTableProvider {
 
         @Override
         protected void generate() {
-            dropSelf(Create_alerted.BASIC_ALARM_BLOCK.get());
-            dropSelf(Create_alerted.ANNOYING_ALARM_BLOCK.get());
-            dropSelf(Create_alerted.BUZZ_ALARM_BLOCK.get());
+            dropSelf(CreateAlerted.BASIC_ALARM_BLOCK.get());
+            dropSelf(CreateAlerted.ANNOYING_ALARM_BLOCK.get());
+            dropSelf(CreateAlerted.BUZZ_ALARM_BLOCK.get());
         }
 
         @Override
         protected @NotNull Iterable<Block> getKnownBlocks() {
             return List.of(
-                    Create_alerted.BASIC_ALARM_BLOCK.get(),
-                    Create_alerted.ANNOYING_ALARM_BLOCK.get(),
-                    Create_alerted.BUZZ_ALARM_BLOCK.get()
+                    CreateAlerted.BASIC_ALARM_BLOCK.get(),
+                    CreateAlerted.ANNOYING_ALARM_BLOCK.get(),
+                    CreateAlerted.BUZZ_ALARM_BLOCK.get()
             );
         }
     }

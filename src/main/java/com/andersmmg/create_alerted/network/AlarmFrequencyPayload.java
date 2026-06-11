@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.network;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.block.AlarmBlockEntity;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import net.minecraft.core.BlockPos;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record AlarmFrequencyPayload(BlockPos pos, boolean first, ItemStack stack) implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<AlarmFrequencyPayload> TYPE =
-            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Create_alerted.MODID, "alarm_frequency"));
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "alarm_frequency"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AlarmFrequencyPayload> CODEC =
             StreamCodec.composite(

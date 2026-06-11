@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.menu;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.block.AlarmBlockEntity;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
@@ -17,7 +17,7 @@ public class AlarmMenu extends AbstractContainerMenu {
     private final AlarmBlockEntity blockEntity;
 
     public AlarmMenu(int containerId, Inventory playerInventory, AlarmBlockEntity blockEntity) {
-        super(Create_alerted.ALARM_MENU.get(), containerId);
+        super(CreateAlerted.ALARM_MENU.get(), containerId);
         this.blockEntity = blockEntity;
 
         addSlot(new FrequencySlot(blockEntity, true, 71, 20));

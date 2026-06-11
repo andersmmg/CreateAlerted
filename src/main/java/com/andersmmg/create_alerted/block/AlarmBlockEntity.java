@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.block;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.redstone.link.IRedstoneLinkable;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
@@ -23,7 +23,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     private boolean registered = false;
 
     public AlarmBlockEntity(BlockPos pos, BlockState blockState) {
-        super(Create_alerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
+        super(CreateAlerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
     }
 
     public void registerNetwork() {

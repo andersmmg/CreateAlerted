@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.datagen;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.block.AlarmBlock;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -13,14 +13,14 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 public class ModBlockStateProvider extends BlockStateProvider {
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
-        super(output, Create_alerted.MODID, exFileHelper);
+        super(output, CreateAlerted.MODID, exFileHelper);
     }
 
     @Override
     protected void registerStatesAndModels() {
-        alarmBlock(Create_alerted.BASIC_ALARM_BLOCK.get());
-        alarmBlock(Create_alerted.ANNOYING_ALARM_BLOCK.get());
-        alarmBlock(Create_alerted.BUZZ_ALARM_BLOCK.get());
+        alarmBlock(CreateAlerted.BASIC_ALARM_BLOCK.get());
+        alarmBlock(CreateAlerted.ANNOYING_ALARM_BLOCK.get());
+        alarmBlock(CreateAlerted.BUZZ_ALARM_BLOCK.get());
     }
 
     private void alarmBlock(Block block) {

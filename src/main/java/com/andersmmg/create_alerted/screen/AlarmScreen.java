@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.screen;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmFrequencyPayload;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,7 +15,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 public class AlarmScreen extends AbstractContainerScreen<AlarmMenu> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Create_alerted.MODID, "textures/gui/alarm.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "textures/gui/alarm.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 133;
 

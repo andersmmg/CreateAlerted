@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.datagen;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -11,7 +11,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.concurrent.CompletableFuture;
 
-@EventBusSubscriber(modid = Create_alerted.MODID)
+@EventBusSubscriber(modid = CreateAlerted.MODID)
 public class DataGeneration {
     @SubscribeEvent
     public static void onGatherData(GatherDataEvent event) {

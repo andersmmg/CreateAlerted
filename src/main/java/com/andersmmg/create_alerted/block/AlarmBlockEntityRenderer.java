@@ -1,6 +1,6 @@
 package com.andersmmg.create_alerted.block;
 
-import com.andersmmg.create_alerted.Create_alerted;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -81,7 +81,7 @@ public class AlarmBlockEntityRenderer implements BlockEntityRenderer<AlarmBlockE
 
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
-                .apply(ResourceLocation.fromNamespaceAndPath(Create_alerted.MODID, "block/alarm_light"));
+                .apply(ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "block/alarm_light"));
 
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);

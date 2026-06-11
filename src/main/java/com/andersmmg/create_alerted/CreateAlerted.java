@@ -30,8 +30,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.LoggerFactory;
 
-@Mod(Create_alerted.MODID)
-public class Create_alerted {
+@Mod(CreateAlerted.MODID)
+public class CreateAlerted {
     public static final String MODID = "create_alerted";
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
@@ -67,7 +67,8 @@ public class Create_alerted {
                             ANNOYING_ALARM_BLOCK.get(),
                             BUZZ_ALARM_BLOCK.get()
                     ).build(null));
-    public Create_alerted(IEventBus modEventBus, ModContainer modContainer) {
+
+    public CreateAlerted(IEventBus modEventBus, ModContainer modContainer) {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
