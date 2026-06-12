@@ -45,6 +45,10 @@ public class AlarmBlockEntityRenderer implements BlockEntityRenderer<AlarmBlockE
     private static final float BEAM_LENGTH = 1.0f;
     private static final float NEAR_SIZE = 0.05f;
     private static final float FAR_SIZE = 0.2f;
+    private static final int BEAM_COLOR_R = 255;
+    private static final int BEAM_COLOR_G = 0;
+    private static final int BEAM_COLOR_B = 0;
+    private static final int BEAM_COLOR_A = 255;
     private static RenderType additiveBeam;
     public AlarmBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -137,10 +141,10 @@ public class AlarmBlockEntityRenderer implements BlockEntityRenderer<AlarmBlockE
                          float x2, float y2, float z2, float x3, float y3, float z3,
                          float u0, float v0, float u1, float v1, float u2, float v2, float u3, float v3) {
         Matrix4f matrix = poseStack.last().pose();
-        consumer.addVertex(matrix, x0, y0, z0).setColor(255, 50, 50, 255).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
-        consumer.addVertex(matrix, x1, y1, z1).setColor(255, 50, 50, 255).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
-        consumer.addVertex(matrix, x2, y2, z2).setColor(255, 50, 50, 255).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
-        consumer.addVertex(matrix, x3, y3, z3).setColor(255, 50, 50, 255).setUv(u3, v3).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
+        consumer.addVertex(matrix, x0, y0, z0).setColor(BEAM_COLOR_R, BEAM_COLOR_G, BEAM_COLOR_B, BEAM_COLOR_A).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
+        consumer.addVertex(matrix, x1, y1, z1).setColor(BEAM_COLOR_R, BEAM_COLOR_G, BEAM_COLOR_B, BEAM_COLOR_A).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
+        consumer.addVertex(matrix, x2, y2, z2).setColor(BEAM_COLOR_R, BEAM_COLOR_G, BEAM_COLOR_B, BEAM_COLOR_A).setUv(u2, v2).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
+        consumer.addVertex(matrix, x3, y3, z3).setColor(BEAM_COLOR_R, BEAM_COLOR_G, BEAM_COLOR_B, BEAM_COLOR_A).setUv(u3, v3).setOverlay(OverlayTexture.NO_OVERLAY).setLight(0xF000F0).setNormal(poseStack.last(), 0, 1, 0);
     }
 
     private void applyFacingRotation(PoseStack poseStack, Direction facing) {
