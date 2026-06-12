@@ -90,6 +90,9 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
                 boolean currentlyPowered = state.getValue(AlarmBlock.POWERED);
                 if (shouldBePowered != currentlyPowered) {
                     level.setBlock(worldPosition, state.setValue(AlarmBlock.POWERED, shouldBePowered), 3);
+                    if (shouldBePowered) {
+                        level.scheduleTick(worldPosition, state.getBlock(), 0);
+                    }
                 }
             }
         }

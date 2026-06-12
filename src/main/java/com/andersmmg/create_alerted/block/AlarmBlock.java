@@ -178,9 +178,7 @@ public class AlarmBlock extends Block implements EntityBlock {
     }
 
     private void scheduleSoundTick(Level level, BlockPos pos) {
-        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
-            level.scheduleTick(pos, this, be.getSoundInterval());
-        }
+        level.scheduleTick(pos, this, 0);
     }
 
     private boolean shouldBePowered(Level level, BlockPos pos) {
