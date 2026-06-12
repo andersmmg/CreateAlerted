@@ -27,10 +27,14 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     }
 
     public void registerNetwork() {
-        if (level != null && !level.isClientSide && !registered) {
+        if (level != null && !level.isClientSide && !registered && hasFrequency()) {
             Create.REDSTONE_LINK_NETWORK_HANDLER.addToNetwork(level, this);
             registered = true;
         }
+    }
+
+    private boolean hasFrequency() {
+        return !frequencyFirst.isEmpty() || !frequencyLast.isEmpty();
     }
 
     @Override
@@ -103,6 +107,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     public void setFrequency(boolean first, ItemStack stack) {
         if (level != null && !level.isClientSide && registered) {
             Create.REDSTONE_LINK_NETWORK_HANDLER.removeFromNetwork(level, this);
+            registered = false;
         }
         if (first) {
             frequencyFirst = stack.copy();
@@ -111,8 +116,11 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         }
         setChanged();
         if (level != null && !level.isClientSide) {
-            Create.REDSTONE_LINK_NETWORK_HANDLER.addToNetwork(level, this);
-            Create.REDSTONE_LINK_NETWORK_HANDLER.updateNetworkOf(level, this);
+            if (hasFrequency()) {
+                Create.REDSTONE_LINK_NETWORK_HANDLER.addToNetwork(level, this);
+                Create.REDSTONE_LINK_NETWORK_HANDLER.updateNetworkOf(level, this);
+                registered = true;
+            }
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
