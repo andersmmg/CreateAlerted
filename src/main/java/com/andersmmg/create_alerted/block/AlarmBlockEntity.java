@@ -24,6 +24,8 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     private ResourceLocation alarmTypeId;
     private int receivedSignal = 0;
     private boolean registered = false;
+    private long lastPoweredChangeTime = -1;
+    private boolean wasPowered = false;
 
     public AlarmBlockEntity(BlockPos pos, BlockState blockState) {
         super(CreateAlerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
@@ -147,6 +149,22 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
 
     public int getReceivedSignal() {
         return receivedSignal;
+    }
+
+    public long getLastPoweredChangeTime() {
+        return lastPoweredChangeTime;
+    }
+
+    public void setLastPoweredChangeTime(long time) {
+        this.lastPoweredChangeTime = time;
+    }
+
+    public boolean wasPowered() {
+        return wasPowered;
+    }
+
+    public void setWasPowered(boolean powered) {
+        this.wasPowered = powered;
     }
 
     public SoundEvent getAlarmSound() {
