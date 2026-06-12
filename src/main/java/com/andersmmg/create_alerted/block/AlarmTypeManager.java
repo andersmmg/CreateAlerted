@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
-    public static final AlarmTypeManager INSTANCE = new AlarmTypeManager();
     private static final Gson GSON = new GsonBuilder().create();
+    public static final AlarmTypeManager INSTANCE = new AlarmTypeManager();
     private static final Logger LOGGER = LoggerFactory.getLogger("CreateAlerted/AlarmTypes");
     private static final ResourceLocation DEFAULT_ID = ResourceLocation.fromNamespaceAndPath("create_alerted", "basic");
     private Map<ResourceLocation, AlarmType> types = Map.of();
