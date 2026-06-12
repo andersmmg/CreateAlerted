@@ -26,17 +26,13 @@ public class ModLootTableProvider extends LootTableProvider {
 
         @Override
         protected void generate() {
-            dropSelf(CreateAlerted.BASIC_ALARM_BLOCK.get());
-            dropSelf(CreateAlerted.ANNOYING_ALARM_BLOCK.get());
-            dropSelf(CreateAlerted.BUZZ_ALARM_BLOCK.get());
+            dropSelf(CreateAlerted.ALARM_BLOCK.get());
         }
 
         @Override
         protected @NotNull Iterable<Block> getKnownBlocks() {
             return List.of(
-                    CreateAlerted.BASIC_ALARM_BLOCK.get(),
-                    CreateAlerted.ANNOYING_ALARM_BLOCK.get(),
-                    CreateAlerted.BUZZ_ALARM_BLOCK.get()
+                    CreateAlerted.ALARM_BLOCK.get()
             );
         }
     }

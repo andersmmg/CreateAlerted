@@ -12,8 +12,6 @@ public class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        withExistingParent("alarm_basic", modLoc("block/alarm_basic_off_plain"));
-        withExistingParent("alarm_annoying", modLoc("block/alarm_annoying_off_plain"));
-        withExistingParent("alarm_buzz", modLoc("block/alarm_buzz_off_plain"));
+        withExistingParent("alarm", modLoc("block/alarm_off_plain"));
     }
 }

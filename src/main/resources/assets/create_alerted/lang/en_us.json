@@ -1,9 +1,10 @@
 {
-  "block.create_alerted.alarm_basic": "Basic Alarm",
-  "block.create_alerted.alarm_annoying": "Annoying Alarm",
-  "block.create_alerted.alarm_buzz": "Buzz Alarm",
+  "block.create_alerted.alarm": "Alarm",
   "subtitles.create_alerted.alarm_basic": "Alarm blaring",
   "subtitles.create_alerted.alarm_annoying": "Alarm blaring",
   "subtitles.create_alerted.alarm_buzz": "Alarm sounding",
-  "create_alerted.configuration.alarmVolume": "Alarm Volume"
+  "create_alerted.configuration.alarmVolume": "Alarm Volume",
+  "alarm_type.basic": "Basic",
+  "alarm_type.annoying": "Annoying",
+  "alarm_type.buzz": "Buzz"
 }

@@ -11,6 +11,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,11 +21,29 @@ import org.jetbrains.annotations.Nullable;
 public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     private ItemStack frequencyFirst = ItemStack.EMPTY;
     private ItemStack frequencyLast = ItemStack.EMPTY;
+    private ResourceLocation alarmTypeId;
     private int receivedSignal = 0;
     private boolean registered = false;
 
     public AlarmBlockEntity(BlockPos pos, BlockState blockState) {
         super(CreateAlerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
+        this.alarmTypeId = AlarmTypeManager.INSTANCE.getDefaultId();
+    }
+
+    public ResourceLocation getTypeId() {
+        return alarmTypeId;
+    }
+
+    public void setTypeId(ResourceLocation id) {
+        this.alarmTypeId = id;
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public AlarmType getAlarmType() {
+        return AlarmTypeManager.INSTANCE.getType(alarmTypeId);
     }
 
     public void registerNetwork() {
@@ -129,11 +149,20 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         return receivedSignal;
     }
 
+    public SoundEvent getAlarmSound() {
+        return AlarmTypeManager.getSound(alarmTypeId);
+    }
+
+    public int getSoundInterval() {
+        return AlarmTypeManager.getInterval(alarmTypeId);
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
+        tag.putString("AlarmType", alarmTypeId.toString());
         tag.putInt("ReceivedSignal", receivedSignal);
     }
 
@@ -142,6 +171,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         super.loadAdditional(tag, registries);
         frequencyFirst = ItemStack.parseOptional(registries, tag.getCompound("FrequencyFirst"));
         frequencyLast = ItemStack.parseOptional(registries, tag.getCompound("FrequencyLast"));
+        alarmTypeId = ResourceLocation.parse(tag.getString("AlarmType"));
         receivedSignal = tag.getInt("ReceivedSignal");
     }
 
@@ -150,6 +180,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         CompoundTag tag = super.getUpdateTag(registries);
         tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
+        tag.putString("AlarmType", alarmTypeId.toString());
         return tag;
     }
 

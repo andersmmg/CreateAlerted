@@ -18,9 +18,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        alarmBlock(CreateAlerted.BASIC_ALARM_BLOCK.get());
-        alarmBlock(CreateAlerted.ANNOYING_ALARM_BLOCK.get());
-        alarmBlock(CreateAlerted.BUZZ_ALARM_BLOCK.get());
+        alarmBlock(CreateAlerted.ALARM_BLOCK.get());
     }
 
     private void alarmBlock(Block block) {

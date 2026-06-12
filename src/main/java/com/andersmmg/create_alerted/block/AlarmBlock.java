@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -37,7 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AlarmBlock extends Block implements EntityBlock {
+public class AlarmBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty CAGE = BooleanProperty.create("cage");
@@ -56,10 +55,6 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
                 .setValue(POWERED, false)
                 .setValue(CAGE, false));
     }
-
-    public abstract SoundEvent getAlarmSound();
-
-    public abstract int getSoundInterval();
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -121,10 +116,10 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
-        if (state.getValue(POWERED)) {
+        if (state.getValue(POWERED) && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
             Vec3 soundPos = SableCompat.getGlobalPos(level, Vec3.atCenterOf(pos));
-            level.playSound(null, soundPos.x, soundPos.y, soundPos.z, getAlarmSound(), SoundSource.BLOCKS, (float) Config.alarmVolume, 1.0f);
-            scheduleSoundTick(level, pos);
+            level.playSound(null, soundPos.x, soundPos.y, soundPos.z, be.getAlarmSound(), SoundSource.BLOCKS, (float) Config.alarmVolume, 1.0f);
+            level.scheduleTick(pos, this, be.getSoundInterval());
         }
     }
 
@@ -183,7 +178,9 @@ public abstract class AlarmBlock extends Block implements EntityBlock {
     }
 
     private void scheduleSoundTick(Level level, BlockPos pos) {
-        level.scheduleTick(pos, this, getSoundInterval());
+        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+            level.scheduleTick(pos, this, be.getSoundInterval());
+        }
     }
 
     private boolean shouldBePowered(Level level, BlockPos pos) {
