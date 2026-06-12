@@ -1,6 +1,7 @@
-# Create: Alerted
 
-![Create: Alerted](https://img.shields.io/badge/NeoForge-1.21.1-000?style=for-the-badge)
+![Lock & Block](https://github.com/user-attachments/assets/4bd2a6e4-b564-4767-a202-20e699647d19)
+
+![Neoforge 1.21.1](https://img.shields.io/badge/NeoForge-1.21.1-000?style=for-the-badge)
 
 [![Modrinth](https://img.shields.io/badge/Modrinth-1bd96a?style=for-the-badge&logo=modrinth&logoColor=white)]()
 [![GitHub](https://img.shields.io/badge/GitHub-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/andersmmg/CreateAlerted)
@@ -24,7 +25,7 @@ Create: Alerted is a Create mod addon that adds alarm blocks and redstone-contro
 
 ### Downloads
 
-- [Modrinth]()
+- [Modrinth](https://modrinth.com/project/create-alerted)
 - [GitHub](https://github.com/andersmmg/CreateAlerted/releases)
 
 ### Contributing and Feedback:
