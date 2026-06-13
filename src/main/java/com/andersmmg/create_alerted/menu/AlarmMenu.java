@@ -8,6 +8,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +21,10 @@ public class AlarmMenu extends AbstractContainerMenu {
         super(CreateAlerted.ALARM_MENU.get(), containerId);
         this.blockEntity = blockEntity;
 
-        addSlot(new FrequencySlot(blockEntity, true, 71, 20));
-        addSlot(new FrequencySlot(blockEntity, false, 89, 20));
+        addSlot(new FrequencySlot(blockEntity, true, 16, 27));
+        addSlot(new FrequencySlot(blockEntity, false, 36, 27));
 
-        addPlayerInventory(playerInventory, 51);
+        addPlayerSlots(playerInventory, 28, 106);
     }
 
     public static AlarmMenu fromNetwork(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
@@ -35,15 +36,25 @@ public class AlarmMenu extends AbstractContainerMenu {
         return null;
     }
 
-    private void addPlayerInventory(Inventory playerInventory, int yStart) {
-        for (int row = 0; row < 3; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, yStart + row * 18));
+    @Override
+    public void clicked(int slotId, int dragType, ClickType clickType, Player player) {
+        if (slotId == 0 || slotId == 1) {
+            if (clickType == ClickType.PICKUP) {
+                boolean isFirst = (slotId == 0);
+                ItemStack held = getCarried();
+                blockEntity.setFrequency(isFirst, held.isEmpty() ? ItemStack.EMPTY : held.copyWithCount(1));
             }
+            return;
         }
-        for (int col = 0; col < 9; ++col) {
-            addSlot(new Slot(playerInventory, col, 8 + col * 18, yStart + 58));
-        }
+        super.clicked(slotId, dragType, clickType, player);
+    }
+
+    private void addPlayerSlots(Inventory inv, int x, int y) {
+        for (int row = 0; row < 3; ++row)
+            for (int col = 0; col < 9; ++col)
+                addSlot(new Slot(inv, col + row * 9 + 9, x + col * 18, y + row * 18));
+        for (int hotbarSlot = 0; hotbarSlot < 9; ++hotbarSlot)
+            addSlot(new Slot(inv, hotbarSlot, x + hotbarSlot * 18, y + 58));
     }
 
     public AlarmBlockEntity getBlockEntity() {
@@ -81,17 +92,15 @@ public class AlarmMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(@NotNull ItemStack stack) {
-            return true;
+            return false;
         }
 
         @Override
         public void setByPlayer(@NotNull ItemStack stack) {
-            blockEntity.setFrequency(first, stack);
         }
 
         @Override
         public void set(@NotNull ItemStack stack) {
-            blockEntity.setFrequency(first, stack);
         }
 
         public int getMaxStackSize() {
