@@ -1,14 +1,18 @@
 package com.andersmmg.create_alerted.block;
 
 import com.andersmmg.create_alerted.Config;
+import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.integration.SableCompat;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -16,8 +20,12 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -33,13 +41,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class AlarmBlock extends Block implements EntityBlock {
+public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty CAGE = BooleanProperty.create("cage");
+    public static final int DEFAULT_COLOR = DyeColor.RED.getTextureDiffuseColor() & 0xFFFFFF;
 
     private static final VoxelShape SHAPE_UP = Block.box(5, 0, 5, 11, 8, 11);
     private static final VoxelShape SHAPE_DOWN = Block.box(5, 8, 5, 11, 16, 11);
@@ -135,8 +146,32 @@ public class AlarmBlock extends Block implements EntityBlock {
         };
     }
 
+    private static ItemStack createColoredStack(int color) {
+        ItemStack stack = new ItemStack(CreateAlerted.ALARM_BLOCK_ITEM.get());
+        if (color != DEFAULT_COLOR) {
+            stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true));
+        }
+        return stack;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (openMenu(state, level, pos, player)) return InteractionResult.SUCCESS;
+        return super.useWithoutItem(state, level, pos, player, hitResult);
+    }
+
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (stack.getItem() instanceof DyeItem dyeItem) {
+            if (!level.isClientSide && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+                int newColor = dyeItem.getDyeColor().getTextureDiffuseColor() & 0xFFFFFF;
+                if (be.getColor() != newColor) {
+                    be.setColor(newColor);
+                    if (!player.isCreative()) stack.shrink(1);
+                }
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
         if (stack.getItem() instanceof WrenchItem && !player.isShiftKeyDown()) {
             if (!level.isClientSide) {
                 level.setBlock(pos, state.cycle(CAGE), 3);
@@ -148,9 +183,46 @@ public class AlarmBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (openMenu(state, level, pos, player)) return InteractionResult.SUCCESS;
-        return super.useWithoutItem(state, level, pos, player, hitResult);
+    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity be, ItemStack tool) {
+        player.awardStat(Stats.BLOCK_MINED.get(this));
+        player.causeFoodExhaustion(0.005F);
+        if (!level.isClientSide) {
+            int blockColor = DEFAULT_COLOR;
+            if (be instanceof AlarmBlockEntity alarmBE) {
+                blockColor = alarmBE.getColor();
+            }
+            ItemStack drop = createColoredStack(blockColor);
+            Block.popResource(level, pos, drop);
+        }
+    }
+
+    @Override
+    public InteractionResult onSneakWrenched(BlockState state, UseOnContext context) {
+        Level world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        Player player = context.getPlayer();
+
+        if (!(world instanceof ServerLevel serverLevel))
+            return InteractionResult.SUCCESS;
+
+        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, world.getBlockState(pos), player);
+        NeoForge.EVENT_BUS.post(event);
+        if (event.isCanceled())
+            return InteractionResult.SUCCESS;
+
+        if (player != null && !player.isCreative()) {
+            int blockColor = DEFAULT_COLOR;
+            if (world.getBlockEntity(pos) instanceof AlarmBlockEntity alarmBE) {
+                blockColor = alarmBE.getColor();
+            }
+            ItemStack stack = createColoredStack(blockColor);
+            player.getInventory().placeItemBackInInventory(stack);
+        }
+
+        state.spawnAfterBreak(serverLevel, pos, ItemStack.EMPTY, true);
+        world.destroyBlock(pos, false);
+        IWrenchable.playRemoveSound(world, pos);
+        return InteractionResult.SUCCESS;
     }
 
     @Nullable

@@ -5,14 +5,18 @@ import com.andersmmg.create_alerted.block.AlarmBlockEntity;
 import com.andersmmg.create_alerted.block.AlarmBlockEntityRenderer;
 import com.andersmmg.create_alerted.block.AlarmTypeManager;
 import com.andersmmg.create_alerted.integration.SableCompat;
+import com.andersmmg.create_alerted.item.AlarmBlockItem;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmFrequencyPayload;
 import com.andersmmg.create_alerted.network.AlarmTypePayload;
 import com.andersmmg.create_alerted.screen.AlarmScreen;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -21,6 +25,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -51,12 +56,14 @@ public class CreateAlerted {
     public static final DeferredBlock<AlarmBlock> ALARM_BLOCK = BLOCKS.registerBlock("alarm",
             AlarmBlock::new,
             ALARM_PROPERTIES);
-    public static final DeferredItem<BlockItem> ALARM_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("alarm", ALARM_BLOCK);
+    public static final DeferredItem<AlarmBlockItem> ALARM_BLOCK_ITEM = ITEMS.registerItem("alarm",
+            props -> new AlarmBlockItem(ALARM_BLOCK.get(), props));
 
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredHolder<MenuType<?>, MenuType<AlarmMenu>> ALARM_MENU =
             MENUS.register("alarm", () -> IMenuTypeExtension.create(AlarmMenu::fromNetwork));
+
     public CreateAlerted(IEventBus modEventBus, ModContainer modContainer) {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
@@ -74,6 +81,8 @@ public class CreateAlerted {
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::registerScreens);
         modEventBus.addListener(this::registerRenderers);
+        modEventBus.addListener(this::registerBlockColors);
+        modEventBus.addListener(this::registerItemColors);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
@@ -115,6 +124,34 @@ public class CreateAlerted {
         if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
             event.accept(ALARM_BLOCK_ITEM);
         }
+    }
+
+    private void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        BlockColor blockColor = (state, level, pos, tintIndex) -> {
+            if (level != null && pos != null && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+                return be.getColor();
+            }
+            return AlarmBlock.DEFAULT_COLOR;
+        };
+        event.register(blockColor, ALARM_BLOCK.get());
+    }
+
+    private void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        ItemColor itemColor = (stack, tintIndex) -> {
+            var dyedItemColor = stack.get(DataComponents.DYED_COLOR);
+            if (dyedItemColor != null) {
+                return dyedItemColor.rgb() & 0xFFFFFF;
+            }
+            var blockEntityData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+            if (blockEntityData != null && !blockEntityData.isEmpty()) {
+                DyeColor dc = DyeColor.byName(blockEntityData.copyTag().getString("DyeColor"), null);
+                if (dc != null) {
+                    return dc.getTextureDiffuseColor() & 0xFFFFFF;
+                }
+            }
+            return AlarmBlock.DEFAULT_COLOR;
+        };
+        event.register(itemColor, ALARM_BLOCK_ITEM.get());
     }
 
 

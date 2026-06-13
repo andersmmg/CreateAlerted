@@ -5,14 +5,17 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.redstone.link.IRedstoneLinkable;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import net.createmod.catnip.data.Couple;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +29,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     private boolean registered = false;
     private long lastPoweredChangeTime = -1;
     private boolean wasPowered = false;
+    private int color = DyeColor.RED.getTextureDiffuseColor() & 0xFFFFFF;
 
     public AlarmBlockEntity(BlockPos pos, BlockState blockState) {
         super(CreateAlerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
@@ -170,6 +174,27 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         this.wasPowered = powered;
     }
 
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        super.onDataPacket(net, pkt, lookupProvider);
+        if (level != null && level.isClientSide) {
+            Minecraft.getInstance().levelRenderer
+                    .setSectionDirty(worldPosition.getX() >> 4, worldPosition.getY() >> 4, worldPosition.getZ() >> 4);
+        }
+    }
+
     public SoundEvent getAlarmSound() {
         return AlarmTypeManager.getSound(alarmTypeId);
     }
@@ -185,6 +210,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
         tag.putString("AlarmType", alarmTypeId.toString());
         tag.putInt("ReceivedSignal", receivedSignal);
+        tag.putInt("Color", color);
     }
 
     @Override
@@ -194,6 +220,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         frequencyLast = ItemStack.parseOptional(registries, tag.getCompound("FrequencyLast"));
         alarmTypeId = ResourceLocation.parse(tag.getString("AlarmType"));
         receivedSignal = tag.getInt("ReceivedSignal");
+        color = tag.getInt("Color");
     }
 
     @Override
@@ -202,6 +229,7 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
         tag.putString("AlarmType", alarmTypeId.toString());
+        tag.putInt("Color", color);
         return tag;
     }
 
