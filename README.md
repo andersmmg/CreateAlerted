@@ -3,7 +3,7 @@
 
 ![Neoforge 1.21.1](https://img.shields.io/badge/NeoForge-1.21.1-000?style=for-the-badge)
 
-[![Modrinth](https://img.shields.io/badge/Modrinth-1bd96a?style=for-the-badge&logo=modrinth&logoColor=white)]()
+[![Modrinth](https://img.shields.io/badge/Modrinth-1bd96a?style=for-the-badge&logo=modrinth&logoColor=white)](https://modrinth.com/mod/create-alerted)
 [![GitHub](https://img.shields.io/badge/GitHub-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/andersmmg/CreateAlerted)
 [![Issues](https://img.shields.io/github/issues-raw/andersmmg/CreateAlerted?style=for-the-badge&logo=github&label=Issues)](https://github.com/andersmmg/CreateAlerted/issues)
 
