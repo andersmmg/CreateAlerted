@@ -10,6 +10,9 @@ import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmFrequencyPayload;
 import com.andersmmg.create_alerted.network.AlarmTypePayload;
 import com.andersmmg.create_alerted.screen.AlarmScreen;
+import com.simibubi.create.foundation.item.ItemDescription;
+import com.simibubi.create.foundation.item.TooltipModifier;
+import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.component.DataComponents;
@@ -23,7 +26,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -39,6 +41,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Mod(CreateAlerted.MODID)
@@ -59,6 +62,18 @@ public class CreateAlerted {
     public static final DeferredItem<AlarmBlockItem> ALARM_BLOCK_ITEM = ITEMS.registerItem("alarm",
             props -> new AlarmBlockItem(ALARM_BLOCK.get(), props));
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateAlerted.class);
+
+    static {
+        LOGGER.info("Registering alarm tooltip modifier provider");
+        TooltipModifier.REGISTRY.registerProvider(key -> {
+            if (key instanceof AlarmBlockItem) {
+                return new ItemDescription.Modifier(key, FontHelper.Palette.STANDARD_CREATE);
+            }
+            return null;
+        });
+    }
+
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredHolder<MenuType<?>, MenuType<AlarmMenu>> ALARM_MENU =
@@ -78,7 +93,6 @@ public class CreateAlerted {
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::registerPayload);
-        modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::registerScreens);
         modEventBus.addListener(this::registerRenderers);
         modEventBus.addListener(this::registerBlockColors);
@@ -106,9 +120,6 @@ public class CreateAlerted {
                 AlarmTypePayload.CODEC,
                 AlarmTypePayload::handle
         );
-    }
-
-    private void clientSetup(FMLClientSetupEvent event) {
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {

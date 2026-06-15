@@ -6,5 +6,6 @@
   "create_alerted.configuration.alarmVolume": "Alarm Volume",
   "alarm_type.basic": "Basic",
   "alarm_type.annoying": "Annoying",
-  "alarm_type.buzz": "Buzz"
+  "alarm_type.buzz": "Buzz",
+  "block.create_alerted.alarm.tooltip.summary": "A _configurable_ redstone-controlled _alarm block_ that can produce _various sounds_. _Right-click_ to open the configuration interface to select _alarm type_ and _redstone link frequency_. Use any _dye_ to change the color of the light."
 }
