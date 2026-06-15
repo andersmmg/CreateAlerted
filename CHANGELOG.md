@@ -4,6 +4,8 @@
 
 ### Added
 
+- Tooltip for alarm block
+
 ### Changed
 
 ### Deprecated
