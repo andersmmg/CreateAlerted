@@ -2,26 +2,29 @@ package com.andersmmg.create_alerted.block;
 
 import com.andersmmg.create_alerted.CreateAlerted;
 import com.simibubi.create.Create;
+import com.simibubi.create.content.equipment.clipboard.ClipboardCloneable;
 import com.simibubi.create.content.redstone.link.IRedstoneLinkable;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
+import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.createmod.catnip.data.Couple;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
-public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
+import java.util.List;
+
+public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinkable, ClipboardCloneable {
     private ItemStack frequencyFirst = ItemStack.EMPTY;
     private ItemStack frequencyLast = ItemStack.EMPTY;
     private ResourceLocation alarmTypeId;
@@ -34,6 +37,10 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     public AlarmBlockEntity(BlockPos pos, BlockState blockState) {
         super(CreateAlerted.ALARM_BLOCK_ENTITY.get(), pos, blockState);
         this.alarmTypeId = AlarmTypeManager.INSTANCE.getDefaultId();
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
     }
 
     public ResourceLocation getTypeId() {
@@ -70,12 +77,12 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     }
 
     @Override
-    public void setRemoved() {
+    public void invalidate() {
         if (level != null && !level.isClientSide && registered) {
             Create.REDSTONE_LINK_NETWORK_HANDLER.removeFromNetwork(level, this);
             registered = false;
         }
-        super.setRemoved();
+        super.invalidate();
     }
 
     @Override
@@ -195,6 +202,29 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         }
     }
 
+    @Override
+    public String getClipboardKey() {
+        return "Frequencies";
+    }
+
+    @Override
+    public boolean writeToClipboard(HolderLookup.Provider registries, CompoundTag tag, Direction side) {
+        tag.put("First", frequencyFirst.saveOptional(registries));
+        tag.put("Last", frequencyLast.saveOptional(registries));
+        return true;
+    }
+
+    @Override
+    public boolean readFromClipboard(HolderLookup.Provider registries, CompoundTag tag, Player player, Direction side, boolean simulate) {
+        if (!tag.contains("First") || !tag.contains("Last"))
+            return false;
+        if (simulate)
+            return true;
+        setFrequency(true, ItemStack.parseOptional(registries, tag.getCompound("First")));
+        setFrequency(false, ItemStack.parseOptional(registries, tag.getCompound("Last")));
+        return true;
+    }
+
     public SoundEvent getAlarmSound() {
         return AlarmTypeManager.getSound(alarmTypeId);
     }
@@ -204,8 +234,8 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(tag, registries, clientPacket);
         tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
         tag.putString("AlarmType", alarmTypeId.toString());
@@ -214,8 +244,8 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(tag, registries, clientPacket);
         frequencyFirst = ItemStack.parseOptional(registries, tag.getCompound("FrequencyFirst"));
         frequencyLast = ItemStack.parseOptional(registries, tag.getCompound("FrequencyLast"));
         alarmTypeId = ResourceLocation.parse(tag.getString("AlarmType"));
@@ -223,19 +253,4 @@ public class AlarmBlockEntity extends BlockEntity implements IRedstoneLinkable {
         color = tag.getInt("Color");
     }
 
-    @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
-        tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
-        tag.putString("AlarmType", alarmTypeId.toString());
-        tag.putInt("Color", color);
-        return tag;
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
-    }
 }

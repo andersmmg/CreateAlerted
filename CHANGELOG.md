@@ -5,6 +5,7 @@
 ### Added
 
 - Tooltip for alarm block
+- Support for copying alarm frequencies with clipboard
 
 ### Changed
 
