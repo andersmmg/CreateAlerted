@@ -4,6 +4,8 @@
 
 ### Added
 
+- "Smoke detectors" which alert if fire is detected
+
 ### Changed
 
 ### Deprecated
@@ -11,6 +13,8 @@
 ### Removed
 
 ### Fixed
+
+- Crash when loading in dedicated server environment
 
 ## [0.1.1] - 2026-06-15
 
