@@ -17,6 +17,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(CreateAlerted.ALARM_BLOCK.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                CreateAlerted.ALARM_BLOCK.get(),
+                CreateAlerted.SMOKE_DETECTOR_BLOCK.get()
+        );
     }
 }

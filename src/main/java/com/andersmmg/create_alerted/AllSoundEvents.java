@@ -18,4 +18,7 @@ public class AllSoundEvents {
 
     public static final Supplier<SoundEvent> ALARM_BUZZ = SOUND_EVENTS.register("alarm_buzz",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "alarm_buzz")));
+
+    public static final Supplier<SoundEvent> SMOKE_DETECTOR = SOUND_EVENTS.register("smoke_detector",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "smoke_detector")));
 }
