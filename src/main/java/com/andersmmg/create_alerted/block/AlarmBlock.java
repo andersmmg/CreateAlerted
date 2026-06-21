@@ -129,7 +129,7 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
         if (state.getValue(POWERED) && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
             Vec3 soundPos = SableCompat.getGlobalPos(level, Vec3.atCenterOf(pos));
-            level.playSound(null, soundPos.x, soundPos.y, soundPos.z, be.getAlarmSound(), SoundSource.BLOCKS, (float) Config.alarmVolume, 1.0f);
+            level.playSound(null, soundPos.x, soundPos.y, soundPos.z, be.getAlarmSound(), SoundSource.BLOCKS, (float) Config.alarmVolume * 2.0f, 1.0f);
             level.scheduleTick(pos, this, be.getSoundInterval());
         }
     }

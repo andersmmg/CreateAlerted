@@ -4,6 +4,8 @@
 
 ### Added
 
+- Increased sound range of alarms
+
 ### Changed
 
 ### Deprecated
