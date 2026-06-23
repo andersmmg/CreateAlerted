@@ -4,9 +4,7 @@ import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.integration.SableCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -94,17 +92,6 @@ public class SmokeDetectorBlock extends Block implements EntityBlock {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         if (!level.isClientSide) {
             level.updateNeighborsAt(pos, this);
-            level.scheduleTick(pos, this, 1);
-        }
-    }
-
-    @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (level.isClientSide) return;
-        if (level.getBlockEntity(pos) instanceof SmokeDetectorBlockEntity be) {
-            be.serverTick();
-        } else {
-            level.scheduleTick(pos, this, SmokeDetectorBlockEntity.DETECT_INTERVAL);
         }
     }
 

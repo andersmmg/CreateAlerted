@@ -17,6 +17,7 @@
 ### Fixed
 
 - Allow playing any sound from resources as alarm
+- Optimized smoke detector
 
 ## [0.2.0] - 2026-06-20
 

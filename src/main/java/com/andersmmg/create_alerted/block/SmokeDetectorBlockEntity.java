@@ -12,12 +12,50 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SmokeDetectorBlockEntity extends SmartBlockEntity {
     public static final int DETECT_INTERVAL = 10;
     public static final int SOUND_INTERVAL = 80;
 
+    private static final Map<Integer, SphereOffsets> SPHERE_OFFSETS = new ConcurrentHashMap<>();
+    private long lastDetectTime = -1;
+
     private long lastSoundTickTime = -1;
+
+    private static SphereOffsets buildSphereTable(int radius) {
+        int r2 = radius * radius;
+        int count = 0;
+        for (int dx = -radius; dx <= radius; dx++) {
+            int dx2 = dx * dx;
+            for (int dy = -radius; dy <= radius; dy++) {
+                int sum2 = dx2 + dy * dy;
+                if (sum2 > r2) continue;
+                int dzMax = (int) Math.sqrt(r2 - sum2);
+                count += 2 * dzMax + 1;
+            }
+        }
+        int[] dxArr = new int[count];
+        int[] dyArr = new int[count];
+        int[] dzArr = new int[count];
+        int idx = 0;
+        for (int dx = -radius; dx <= radius; dx++) {
+            int dx2 = dx * dx;
+            for (int dy = -radius; dy <= radius; dy++) {
+                int sum2 = dx2 + dy * dy;
+                if (sum2 > r2) continue;
+                int dzMax = (int) Math.sqrt(r2 - sum2);
+                for (int dz = -dzMax; dz <= dzMax; dz++) {
+                    dxArr[idx] = dx;
+                    dyArr[idx] = dy;
+                    dzArr[idx] = dz;
+                    idx++;
+                }
+            }
+        }
+        return new SphereOffsets(dxArr, dyArr, dzArr);
+    }
     private boolean silenced = false;
 
     public SmokeDetectorBlockEntity(BlockPos pos, BlockState blockState) {
@@ -33,10 +71,6 @@ public class SmokeDetectorBlockEntity extends SmartBlockEntity {
         return state.hasProperty(SmokeDetectorBlock.POWERED) && state.getValue(SmokeDetectorBlock.POWERED);
     }
 
-    /**
-     * Manually acknowledge/silence a triggered detector. The detector stays hushed while
-     * fire is still present, and rearms once no fire is detected.
-     */
     public void silence() {
         if (level == null || level.isClientSide) return;
 
@@ -45,7 +79,6 @@ public class SmokeDetectorBlockEntity extends SmartBlockEntity {
         if (state.getValue(SmokeDetectorBlock.POWERED)) {
             BlockState newState = state.setValue(SmokeDetectorBlock.POWERED, false);
             level.setBlock(worldPosition, newState, 3);
-            // Propagate the redstone change to neighbors
             level.updateNeighborsAt(worldPosition, CreateAlerted.SMOKE_DETECTOR_BLOCK.get());
         }
         setChanged();
@@ -55,53 +88,51 @@ public class SmokeDetectorBlockEntity extends SmartBlockEntity {
         if (level == null || level.isClientSide) return;
 
         long gameTime = level.getGameTime();
-        boolean fireDetected = checkForFire();
         BlockState state = getBlockState();
+        boolean powered = state.getValue(SmokeDetectorBlock.POWERED);
 
-        // If we're hushed and the fire has cleared, re-arm so the next fire re-triggers
-        if (silenced && !fireDetected) {
-            silenced = false;
-        }
+        if (lastDetectTime < 0 || gameTime < lastDetectTime || gameTime - lastDetectTime >= DETECT_INTERVAL) {
+            boolean fireDetected = checkForFire();
+            lastDetectTime = gameTime;
 
-        // Fire alarm is latched: it stays powered until the player resets it. Only fire
-        // when not already powered and not hushed.
-        if (!silenced && fireDetected && !state.getValue(SmokeDetectorBlock.POWERED)) {
-            BlockState newState = state.setValue(SmokeDetectorBlock.POWERED, true);
-            level.setBlock(worldPosition, newState, 3);
-            level.updateNeighborsAt(worldPosition, CreateAlerted.SMOKE_DETECTOR_BLOCK.get());
-            state = newState;
-            lastSoundTickTime = -1; // play immediately on first trigger
-            setChanged();
-        }
+            if (silenced && !fireDetected) {
+                silenced = false;
+            }
 
-        if (state.getValue(SmokeDetectorBlock.POWERED)) {
-            if (lastSoundTickTime < 0 || gameTime - lastSoundTickTime >= SOUND_INTERVAL) {
-                SmokeDetectorBlock.playSound(level, worldPosition, AllSoundEvents.SMOKE_DETECTOR.get(), (float) Config.alarmVolume);
-                lastSoundTickTime = gameTime;
+            if (!silenced && fireDetected && !powered) {
+                BlockState newState = state.setValue(SmokeDetectorBlock.POWERED, true);
+                level.setBlock(worldPosition, newState, 3);
+                level.updateNeighborsAt(worldPosition, CreateAlerted.SMOKE_DETECTOR_BLOCK.get());
+                state = newState;
+                powered = true;
+                lastSoundTickTime = -1;
+                setChanged();
             }
         }
 
-        // Re-schedule detection tick
-        level.scheduleTick(worldPosition, state.getBlock(), DETECT_INTERVAL);
+        if (powered && (lastSoundTickTime < 0 || gameTime < lastSoundTickTime || gameTime - lastSoundTickTime >= SOUND_INTERVAL)) {
+            SmokeDetectorBlock.playSound(level, worldPosition, AllSoundEvents.SMOKE_DETECTOR.get(), (float) Config.alarmVolume * 2.0f);
+            lastSoundTickTime = gameTime;
+        }
     }
 
     private boolean checkForFire() {
         int radius = Config.smokeDetectorRadius;
         if (radius <= 0) return false;
+        SphereOffsets offsets = SPHERE_OFFSETS.computeIfAbsent(radius, SmokeDetectorBlockEntity::buildSphereTable);
         int x0 = worldPosition.getX();
         int y0 = worldPosition.getY();
         int z0 = worldPosition.getZ();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    if (dx * dx + dy * dy + dz * dz > radius * radius) continue;
-                    mutablePos.set(x0 + dx, y0 + dy, z0 + dz);
-                    BlockState state = level.getBlockState(mutablePos);
-                    if (state.is(BlockTags.FIRE)) {
-                        return true;
-                    }
-                }
+
+        int[] dxArr = offsets.dx();
+        int[] dyArr = offsets.dy();
+        int[] dzArr = offsets.dz();
+        int count = dxArr.length;
+        for (int i = 0; i < count; i++) {
+            mutablePos.set(x0 + dxArr[i], y0 + dyArr[i], z0 + dzArr[i]);
+            if (level.getBlockState(mutablePos).is(BlockTags.FIRE)) {
+                return true;
             }
         }
         return false;
@@ -111,6 +142,7 @@ public class SmokeDetectorBlockEntity extends SmartBlockEntity {
     public void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putLong("LastSoundTick", lastSoundTickTime);
+        tag.putLong("LastDetectTick", lastDetectTime);
         tag.putBoolean("Silenced", silenced);
     }
 
@@ -118,6 +150,10 @@ public class SmokeDetectorBlockEntity extends SmartBlockEntity {
     public void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         lastSoundTickTime = tag.getLong("LastSoundTick");
+        lastDetectTime = tag.contains("LastDetectTick") ? tag.getLong("LastDetectTick") : -1L;
         silenced = tag.getBoolean("Silenced");
+    }
+
+    private record SphereOffsets(int[] dx, int[] dy, int[] dz) {
     }
 }
