@@ -17,6 +17,12 @@
       "create_alerted:alarm_buzz"
     ]
   },
+  "alarm_warning": {
+    "subtitle": "subtitles.create_alerted.alarm_warning",
+    "sounds": [
+      "create_alerted:alarm_warning"
+    ]
+  },
   "smoke_detector": {
     "subtitle": "subtitles.create_alerted.smoke_detector",
     "sounds": [

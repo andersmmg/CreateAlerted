@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -51,7 +52,11 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
         this.alarmTypeId = id;
         setChanged();
         if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            BlockState state = level.getBlockState(worldPosition);
+            level.sendBlockUpdated(worldPosition, state, state, 3);
+            if (state.getBlock() instanceof AlarmBlock && state.getValue(AlarmBlock.POWERED) && getAlarmSound() != null) {
+                level.scheduleTick(worldPosition, state.getBlock(), 0);
+            }
         }
     }
 
@@ -225,11 +230,11 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
         return true;
     }
 
-    public SoundEvent getAlarmSound() {
+    public @Nullable SoundEvent getAlarmSound() {
         return AlarmTypeManager.getSound(alarmTypeId);
     }
 
-    public int getSoundInterval() {
+    public @Nullable Integer getSoundInterval() {
         return AlarmTypeManager.getInterval(alarmTypeId);
     }
 

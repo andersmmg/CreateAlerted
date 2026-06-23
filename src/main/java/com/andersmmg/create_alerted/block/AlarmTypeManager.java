@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +18,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().create();
     public static final AlarmTypeManager INSTANCE = new AlarmTypeManager();
     private static final Logger LOGGER = LoggerFactory.getLogger("CreateAlerted/AlarmTypes");
     private static final ResourceLocation DEFAULT_ID = ResourceLocation.fromNamespaceAndPath("create_alerted", "basic");
+    private static final Map<ResourceLocation, SoundEvent> DYNAMIC_SOUNDS = new ConcurrentHashMap<>();
     private Map<ResourceLocation, AlarmType> types = Map.of();
     private List<ResourceLocation> order = List.of();
 
@@ -30,19 +33,32 @@ public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
         super(GSON, "alerted_alarms");
     }
 
-    public static SoundEvent getSound(ResourceLocation id) {
+    public static @Nullable SoundEvent getSound(ResourceLocation id) {
         var type = INSTANCE.types.get(id);
-        if (type != null) {
-            var sound = BuiltInRegistries.SOUND_EVENT.get(type.soundId());
-            if (sound != null) return sound;
+        if (type == null) {
+            return resolveSound(DEFAULT_ID);
         }
-        return BuiltInRegistries.SOUND_EVENT.get(DEFAULT_ID);
+        if (type.soundId() == null) {
+            return null;
+        }
+        return resolveSound(type.soundId());
     }
 
-    public static int getInterval(ResourceLocation id) {
+    private static SoundEvent resolveSound(ResourceLocation soundId) {
+        SoundEvent registered = BuiltInRegistries.SOUND_EVENT.get(soundId);
+        if (registered != null) {
+            return registered;
+        }
+        return DYNAMIC_SOUNDS.computeIfAbsent(soundId, key -> {
+            LOGGER.warn("Sound event for {} not registered; using a dynamically created event (declared only in sounds.json?)", key);
+            return SoundEvent.createVariableRangeEvent(key);
+        });
+    }
+
+    public static @Nullable Integer getInterval(ResourceLocation id) {
         var type = INSTANCE.types.get(id);
-        if (type != null) return type.interval();
-        return 30;
+        if (type == null) return 30;
+        return type.interval();
     }
 
     public static String translationKey(ResourceLocation id) {

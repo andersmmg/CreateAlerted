@@ -5,6 +5,8 @@
 ### Added
 
 - Increased sound range of alarms
+- Warning alarm type
+- Silent alarm type
 
 ### Changed
 
@@ -13,6 +15,8 @@
 ### Removed
 
 ### Fixed
+
+- Allow playing any sound from resources as alarm
 
 ## [0.2.0] - 2026-06-20
 
