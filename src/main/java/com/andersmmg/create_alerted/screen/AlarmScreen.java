@@ -2,8 +2,10 @@ package com.andersmmg.create_alerted.screen;
 
 import com.andersmmg.create_alerted.CreateAlerted;
 import com.andersmmg.create_alerted.block.AlarmTypeManager;
+import com.andersmmg.create_alerted.block.AlarmVisualType;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmTypePayload;
+import com.andersmmg.create_alerted.network.AlarmVisualPayload;
 import com.simibubi.create.foundation.gui.AllIcons;
 import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.simibubi.create.foundation.gui.widget.IconButton;
@@ -20,11 +22,13 @@ import java.util.List;
 
 public class AlarmScreen extends AbstractSimiContainerScreen<AlarmMenu> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(CreateAlerted.MODID, "textures/gui/alarm.png");
-    private static final int BG_WIDTH = 216;
-    private static final int BG_HEIGHT = 84;
+    private static final int BG_WIDTH = 217;
+    private static final int BG_HEIGHT = 107;
 
     private ScrollInput typeScroll;
     private Label typeLabel;
+    private ScrollInput visualScroll;
+    private Label visualLabel;
 
     public AlarmScreen(AlarmMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -46,12 +50,12 @@ public class AlarmScreen extends AbstractSimiContainerScreen<AlarmMenu> {
                 .map(id -> Component.translatable(AlarmTypeManager.translationKey(id)))
                 .toList();
 
-        typeLabel = new Label(x + 63, y + 31, Component.empty())
+        typeLabel = new Label(x + 46, y + 31, Component.empty())
                 .colored(0x404040);
 
-        typeScroll = new SelectionScrollInput(x + 60, y + 28, 142, 15)
+        typeScroll = new SelectionScrollInput(x + 42, y + 28, 159, 15)
                 .forOptions(options)
-                .titled(Component.literal("Alarm Type"))
+                .titled(Component.translatable("screen.alarm.sound_type"))
                 .writingTo(typeLabel)
                 .calling(state -> {
                     ResourceLocation id = order.get(state);
@@ -65,7 +69,28 @@ public class AlarmScreen extends AbstractSimiContainerScreen<AlarmMenu> {
             typeScroll.setState(currentIdx);
         }
 
-        IconButton confirmButton = new IconButton(x + BG_WIDTH - 24, y + 61, AllIcons.I_CONFIRM);
+        var visualTypes = AlarmVisualType.values();
+        List<? extends Component> visualLabels = java.util.Arrays.stream(visualTypes)
+                .map(t -> Component.translatable("visual_type." + t.id().getPath()))
+                .toList();
+
+        visualLabel = new Label(x + 46, y + 53, Component.empty())
+                .colored(0x404040);
+
+        visualScroll = new SelectionScrollInput(x + 42, y + 51, 142, 15)
+                .forOptions(visualLabels)
+                .titled(Component.translatable("screen.alarm.visual_type"))
+                .writingTo(visualLabel)
+                .calling(state -> {
+                    ResourceLocation id = visualTypes[state].id();
+                    menu.getBlockEntity().setVisualId(id);
+                    PacketDistributor.sendToServer(
+                            new AlarmVisualPayload(menu.getBlockEntity().getBlockPos(), id));
+                });
+
+        visualScroll.setState(AlarmVisualType.byId(menu.getBlockEntity().getVisualId()).ordinal());
+
+        IconButton confirmButton = new IconButton(x + BG_WIDTH - 25, y + 83, AllIcons.I_CONFIRM);
         confirmButton.withCallback(() -> {
             if (getMinecraft().player != null) {
                 getMinecraft().player.closeContainer();
@@ -74,6 +99,8 @@ public class AlarmScreen extends AbstractSimiContainerScreen<AlarmMenu> {
 
         addRenderableWidget(typeScroll);
         addRenderableWidget(typeLabel);
+        addRenderableWidget(visualScroll);
+        addRenderableWidget(visualLabel);
         addRenderableWidget(confirmButton);
     }
 

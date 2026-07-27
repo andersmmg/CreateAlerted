@@ -22,9 +22,9 @@ public class AlarmMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
 
         addSlot(new FrequencySlot(blockEntity, true, 16, 27));
-        addSlot(new FrequencySlot(blockEntity, false, 36, 27));
+        addSlot(new FrequencySlot(blockEntity, false, 16, 49));
 
-        addPlayerSlots(playerInventory, 28, 106);
+        addPlayerSlots(playerInventory, 28, 129);
     }
 
     public static AlarmMenu fromNetwork(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {

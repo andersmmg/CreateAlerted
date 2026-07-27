@@ -51,6 +51,7 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final BooleanProperty CAGE = BooleanProperty.create("cage");
+    public static final BooleanProperty LIGHT = BooleanProperty.create("light");
     public static final int DEFAULT_COLOR = DyeColor.RED.getTextureDiffuseColor() & 0xFFFFFF;
 
     private static final VoxelShape SHAPE_UP = Block.box(5, 0, 5, 11, 8, 11);
@@ -65,12 +66,13 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.UP)
                 .setValue(POWERED, false)
-                .setValue(CAGE, false));
+                .setValue(CAGE, false)
+                .setValue(LIGHT, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, POWERED, CAGE);
+        builder.add(FACING, POWERED, CAGE, LIGHT);
     }
 
     @Nullable
@@ -82,7 +84,7 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
             BlockState state = defaultBlockState().setValue(FACING, dir.getOpposite());
             if (state.canSurvive(level, pos)) {
                 boolean powered = level.hasNeighborSignal(pos);
-                return state.setValue(POWERED, powered);
+                return state.setValue(POWERED, powered).setValue(LIGHT, powered);
             }
         }
         return null;
@@ -105,7 +107,15 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
             }
             boolean powered = shouldBePowered(level, pos);
             if (powered != state.getValue(POWERED)) {
-                level.setBlock(pos, state.setValue(POWERED, powered), 3);
+                BlockState newState = state.setValue(POWERED, powered);
+                if (powered) {
+                    boolean lightOn = !(level.getBlockEntity(pos) instanceof AlarmBlockEntity be)
+                            || be.shouldLightBeOn(level.getGameTime());
+                    newState = newState.setValue(LIGHT, lightOn);
+                } else {
+                    newState = newState.setValue(LIGHT, false);
+                }
+                level.setBlock(pos, newState, 3);
                 if (powered) {
                     scheduleSoundTick(level, pos);
                 }
@@ -128,15 +138,36 @@ public class AlarmBlock extends Block implements EntityBlock, IWrenchable {
 
     @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
-        if (state.getValue(POWERED) && level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
-            SoundEvent sound = be.getAlarmSound();
-            if (sound != null) {
-                Vec3 soundPos = SableCompat.getGlobalPos(level, Vec3.atCenterOf(pos));
-                level.playSound(null, soundPos.x, soundPos.y, soundPos.z, sound, SoundSource.BLOCKS, (float) Config.alarmVolume * 2.0f, 1.0f);
-            }
-            Integer interval = be.getSoundInterval();
-            if (interval != null) {
-                level.scheduleTick(pos, this, interval);
+        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+            if (state.getValue(POWERED)) {
+                long gameTime = level.getGameTime();
+
+                SoundEvent sound = be.getAlarmSound();
+                Integer interval = be.getSoundInterval();
+                if (sound != null && interval != null) {
+                    if (be.isLightCycling()) {
+                        if (gameTime % interval == 0) {
+                            Vec3 soundPos = SableCompat.getGlobalPos(level, Vec3.atCenterOf(pos));
+                            level.playSound(null, soundPos.x, soundPos.y, soundPos.z, sound, SoundSource.BLOCKS, (float) Config.alarmVolume * 2.0f, 1.0f);
+                        }
+                    } else {
+                        Vec3 soundPos = SableCompat.getGlobalPos(level, Vec3.atCenterOf(pos));
+                        level.playSound(null, soundPos.x, soundPos.y, soundPos.z, sound, SoundSource.BLOCKS, (float) Config.alarmVolume * 2.0f, 1.0f);
+                    }
+                }
+
+                if (be.isLightCycling()) {
+                    boolean lightOn = be.shouldLightBeOn(gameTime);
+                    if (state.getValue(LIGHT) != lightOn) {
+                        state = state.setValue(LIGHT, lightOn);
+                        level.setBlock(pos, state, 2);
+                    }
+                    level.scheduleTick(pos, this, 1);
+                } else if (interval != null) {
+                    level.scheduleTick(pos, this, interval);
+                }
+            } else if (state.getValue(LIGHT)) {
+                level.setBlock(pos, state.setValue(LIGHT, false), 2);
             }
         }
     }

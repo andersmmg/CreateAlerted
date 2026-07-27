@@ -6,6 +6,7 @@ import com.andersmmg.create_alerted.item.AlarmBlockItem;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmFrequencyPayload;
 import com.andersmmg.create_alerted.network.AlarmTypePayload;
+import com.andersmmg.create_alerted.network.AlarmVisualPayload;
 import com.andersmmg.create_alerted.screen.AlarmScreen;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TooltipModifier;
@@ -54,7 +55,7 @@ public class CreateAlerted {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, MODID);
     public static final DeferredHolder<MenuType<?>, MenuType<AlarmMenu>> ALARM_MENU = MENUS.register("alarm", () -> IMenuTypeExtension.create(AlarmMenu::fromNetwork));
-    private static final BlockBehaviour.Properties ALARM_PROPERTIES = BlockBehaviour.Properties.of().strength(3.0f).requiresCorrectToolForDrops().noOcclusion().lightLevel(state -> state.getValue(AlarmBlock.POWERED) ? 7 : 0);
+    private static final BlockBehaviour.Properties ALARM_PROPERTIES = BlockBehaviour.Properties.of().strength(3.0f).requiresCorrectToolForDrops().noOcclusion().lightLevel(state -> state.getValue(AlarmBlock.LIGHT) ? 7 : 0);
     public static final DeferredBlock<AlarmBlock> ALARM_BLOCK = BLOCKS.registerBlock("alarm", AlarmBlock::new, ALARM_PROPERTIES);
     public static final DeferredItem<AlarmBlockItem> ALARM_BLOCK_ITEM = ITEMS.registerItem("alarm", props -> new AlarmBlockItem(ALARM_BLOCK.get(), props));
     private static final BlockBehaviour.Properties SMOKE_DETECTOR_PROPERTIES = BlockBehaviour.Properties.of().strength(3.0f).requiresCorrectToolForDrops().noOcclusion().lightLevel(state -> state.getValue(SmokeDetectorBlock.POWERED) ? 7 : 0);
@@ -103,6 +104,7 @@ public class CreateAlerted {
         PayloadRegistrar registrar = event.registrar(MODID);
         registrar.playToServer(AlarmFrequencyPayload.TYPE, AlarmFrequencyPayload.CODEC, AlarmFrequencyPayload::handle);
         registrar.playToServer(AlarmTypePayload.TYPE, AlarmTypePayload.CODEC, AlarmTypePayload::handle);
+        registrar.playToServer(AlarmVisualPayload.TYPE, AlarmVisualPayload.CODEC, AlarmVisualPayload::handle);
     }    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AlarmBlockEntity>> ALARM_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register("alarm", () -> BlockEntityType.Builder.of(AlarmBlockEntity::new, ALARM_BLOCK.get()).build(null));
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

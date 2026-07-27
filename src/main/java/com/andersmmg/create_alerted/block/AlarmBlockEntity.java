@@ -26,9 +26,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinkable, ClipboardCloneable {
+
+    // Timing constants matching the renderer (in ticks, 20 ticks = 1 second)
+    public static final float BLINK_FADE_SECONDS = 0.2f;
+    public static final float BLINK_ON_SECONDS = 1.0f;
+    public static final float BLINK_OFF_SECONDS = 1.0f;
+    public static final float BLINK_FADE_TICKS = BLINK_FADE_SECONDS * 20.0f;
+    public static final float BLINK_ON_TICKS = BLINK_ON_SECONDS * 20.0f;
+    public static final float BLINK_FADE_END_TICKS = BLINK_FADE_TICKS + BLINK_ON_TICKS;
+    public static final float BLINK_FADE_OUT_END_TICKS = BLINK_FADE_END_TICKS + BLINK_FADE_TICKS;
+    public static final float BLINK_OFF_TICKS = BLINK_OFF_SECONDS * 20.0f;
+    public static final float BLINK_CYCLE_TICKS = BLINK_FADE_OUT_END_TICKS + BLINK_OFF_TICKS;
+
+    public static final float FLASH_ON_SECONDS = 0.3f;
+    public static final float FLASH_OFF_SECONDS = 1.0f;
+    public static final float FLASH_FADE_TICKS = 2f;
+    public static final float FLASH_ON_TICKS = FLASH_ON_SECONDS * 20.0f;
+    public static final float FLASH_ON_PLATEAU_END = FLASH_ON_TICKS - FLASH_FADE_TICKS;
+    public static final float FLASH_OFF_TICKS = FLASH_OFF_SECONDS * 20.0f;
+    public static final float FLASH_CYCLE_TICKS = FLASH_ON_TICKS + FLASH_OFF_TICKS;
     private ItemStack frequencyFirst = ItemStack.EMPTY;
     private ItemStack frequencyLast = ItemStack.EMPTY;
     private ResourceLocation alarmTypeId;
+    private ResourceLocation visualId = AlarmVisualType.SPIN.id();
     private int receivedSignal = 0;
     private boolean registered = false;
     private long lastPoweredChangeTime = -1;
@@ -58,6 +78,35 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
                 level.scheduleTick(worldPosition, state.getBlock(), 0);
             }
         }
+    }
+
+    public ResourceLocation getVisualId() {
+        return visualId;
+    }
+
+    public void setVisualId(ResourceLocation id) {
+        this.visualId = id;
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public boolean isLightCycling() {
+        if (level == null || level.isClientSide) return false;
+        BlockState state = getBlockState();
+        if (!(state.getBlock() instanceof AlarmBlock) || !state.getValue(AlarmBlock.POWERED)) return false;
+        AlarmVisualType visual = AlarmVisualType.byId(visualId);
+        return visual == AlarmVisualType.FLASHING || visual == AlarmVisualType.BLINK;
+    }
+
+    public boolean shouldLightBeOn(long gameTime) {
+        AlarmVisualType visual = AlarmVisualType.byId(visualId);
+        return switch (visual) {
+            case FLASHING -> (gameTime % (long) FLASH_CYCLE_TICKS) < (long) FLASH_ON_TICKS;
+            case BLINK -> (gameTime % (long) BLINK_CYCLE_TICKS) < (long) BLINK_FADE_OUT_END_TICKS;
+            default -> true;
+        };
     }
 
     public AlarmType getAlarmType() {
@@ -105,7 +154,13 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
                 boolean shouldBePowered = power > 0 || level.hasNeighborSignal(worldPosition);
                 boolean currentlyPowered = state.getValue(AlarmBlock.POWERED);
                 if (shouldBePowered != currentlyPowered) {
-                    level.setBlock(worldPosition, state.setValue(AlarmBlock.POWERED, shouldBePowered), 3);
+                    BlockState newState = state.setValue(AlarmBlock.POWERED, shouldBePowered);
+                    if (shouldBePowered) {
+                        newState = newState.setValue(AlarmBlock.LIGHT, shouldLightBeOn(level.getGameTime()));
+                    } else {
+                        newState = newState.setValue(AlarmBlock.LIGHT, false);
+                    }
+                    level.setBlock(worldPosition, newState, 3);
                     if (shouldBePowered) {
                         level.scheduleTick(worldPosition, state.getBlock(), 0);
                     }
@@ -244,6 +299,7 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
         tag.put("FrequencyFirst", frequencyFirst.saveOptional(registries));
         tag.put("FrequencyLast", frequencyLast.saveOptional(registries));
         tag.putString("AlarmType", alarmTypeId.toString());
+        tag.putString("AlarmVisual", visualId.toString());
         tag.putInt("ReceivedSignal", receivedSignal);
         tag.putInt("Color", color);
     }
@@ -254,6 +310,7 @@ public class AlarmBlockEntity extends SmartBlockEntity implements IRedstoneLinka
         frequencyFirst = ItemStack.parseOptional(registries, tag.getCompound("FrequencyFirst"));
         frequencyLast = ItemStack.parseOptional(registries, tag.getCompound("FrequencyLast"));
         alarmTypeId = ResourceLocation.parse(tag.getString("AlarmType"));
+        visualId = tag.contains("AlarmVisual") ? ResourceLocation.parse(tag.getString("AlarmVisual")) : AlarmVisualType.SPIN.id();
         receivedSignal = tag.getInt("ReceivedSignal");
         color = tag.getInt("Color");
     }

@@ -8,11 +8,16 @@
   "subtitles.create_alerted.smoke_detector": "Smoke detector alarm",
   "create_alerted.configuration.alarmVolume": "Alarm Volume",
   "create_alerted.configuration.smokeDetectorRadius": "Smoke Detector Radius",
+  "screen.alarm.visual_type": "Visual Type",
+  "screen.alarm.sound_type": "Sound Type",
   "alarm_type.basic": "Basic",
   "alarm_type.annoying": "Annoying",
   "alarm_type.buzz": "Buzz",
   "alarm_type.silent": "Silent",
   "alarm_type.warning": "Warning",
+  "visual_type.spin": "Spinning",
+  "visual_type.blink": "Blinking",
+  "visual_type.flashing": "Flashing",
   "block.create_alerted.alarm.tooltip.summary": "A _configurable_ redstone-controlled _alarm block_ that can produce _various sounds_. _Right-click_ to open the configuration interface to select _alarm type_ and _redstone link frequency_. Use any _dye_ to change the color of the light.",
   "block.create_alerted.smoke_detector.tooltip.summary": "Detects _fire_ within a radius and triggers an _alarm_ while emitting a _redstone signal_."
 }

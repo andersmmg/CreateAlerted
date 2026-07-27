@@ -42,14 +42,14 @@ public class ModBlockStateProvider extends BlockStateProvider {
         getVariantBuilder(block)
                 .forAllStates(state -> {
                     Direction facing = state.getValue(AlarmBlock.FACING);
-                    boolean powered = state.getValue(AlarmBlock.POWERED);
+                    boolean lightOn = state.getValue(AlarmBlock.LIGHT);
                     boolean caged = state.getValue(AlarmBlock.CAGE);
 
                     ModelFile model;
                     if (caged) {
-                        model = powered ? onCaged : offCaged;
+                        model = lightOn ? onCaged : offCaged;
                     } else {
-                        model = powered ? onPlain : offPlain;
+                        model = lightOn ? onPlain : offPlain;
                     }
 
                     int x = switch (facing) {
