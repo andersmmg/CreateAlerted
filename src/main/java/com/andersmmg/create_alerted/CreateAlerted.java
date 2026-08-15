@@ -6,6 +6,7 @@ import com.andersmmg.create_alerted.item.AlarmBlockItem;
 import com.andersmmg.create_alerted.menu.AlarmMenu;
 import com.andersmmg.create_alerted.network.AlarmFrequencyPayload;
 import com.andersmmg.create_alerted.network.AlarmTypePayload;
+import com.andersmmg.create_alerted.network.AlarmTypeSyncPayload;
 import com.andersmmg.create_alerted.network.AlarmVisualPayload;
 import com.andersmmg.create_alerted.screen.AlarmScreen;
 import com.simibubi.create.foundation.item.ItemDescription;
@@ -37,6 +38,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -85,6 +88,10 @@ public class CreateAlerted {
         SableCompat.init();
 
         NeoForge.EVENT_BUS.addListener(AddReloadListenerEvent.class, event -> event.addListener(AlarmTypeManager.INSTANCE));
+        NeoForge.EVENT_BUS.addListener(OnDatapackSyncEvent.class, event -> {
+            AlarmTypeSyncPayload payload = new AlarmTypeSyncPayload(AlarmTypeManager.INSTANCE.getOrder());
+            event.getRelevantPlayers().forEach(player -> PacketDistributor.sendToPlayer(player, payload));
+        });
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::registerPayload);
@@ -105,6 +112,7 @@ public class CreateAlerted {
         registrar.playToServer(AlarmFrequencyPayload.TYPE, AlarmFrequencyPayload.CODEC, AlarmFrequencyPayload::handle);
         registrar.playToServer(AlarmTypePayload.TYPE, AlarmTypePayload.CODEC, AlarmTypePayload::handle);
         registrar.playToServer(AlarmVisualPayload.TYPE, AlarmVisualPayload.CODEC, AlarmVisualPayload::handle);
+        registrar.playToClient(AlarmTypeSyncPayload.TYPE, AlarmTypeSyncPayload.CODEC, AlarmTypeSyncPayload::handle);
     }    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AlarmBlockEntity>> ALARM_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register("alarm", () -> BlockEntityType.Builder.of(AlarmBlockEntity::new, ALARM_BLOCK.get()).build(null));
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

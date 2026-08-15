@@ -1,0 +1,93 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - CreateAlerted",
+        "order": 0
+      },
+      "projectName": "CreateAlerted",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dcreate_alerted%%C:\\Space\\Minecraft Mods\\CreateAlerted\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - CreateAlerted",
+        "order": 1
+      },
+      "projectName": "CreateAlerted",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dcreate_alerted%%C:\\Space\\Minecraft Mods\\CreateAlerted\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "GameTestServer",
+      "presentation": {
+        "group": "Mod Development - CreateAlerted",
+        "order": 2
+      },
+      "projectName": "CreateAlerted",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\gameTestServerRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dcreate_alerted%%C:\\Space\\Minecraft Mods\\CreateAlerted\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - CreateAlerted",
+        "order": 3
+      },
+      "projectName": "CreateAlerted",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@C:\\Space\\Minecraft Mods\\CreateAlerted\\build\\moddev\\serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dcreate_alerted%%C:\\Space\\Minecraft Mods\\CreateAlerted\\bin\\main"
+      ],
+      "cwd": "${workspaceFolder}\\run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}

@@ -1,24 +1,26 @@
 package com.andersmmg.create_alerted.block;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = new GsonBuilder().create();
@@ -86,6 +88,15 @@ public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
 
     public List<ResourceLocation> getOrder() {
         return order;
+    }
+
+    /*
+    * Called on the client when the server sends the alarm type order, since the
+    * client's own reload listener never runs on a dedicated server (only the
+    * logical server reloads data pack resources).
+    */
+    public void setClientOrder(List<ResourceLocation> order) {
+        this.order = List.copyOf(order);
     }
 
     public ResourceLocation getDefaultId() {
