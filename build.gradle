@@ -166,7 +166,7 @@ changelog {
 }
 
 modrinth {
-    token = findProperty("MODRINTH_TOKEN") ?: ""
+    token = MODRINTH_TOKEN
     projectId = project.modrinth_id
     versionType = "release"
     uploadFile = jar
@@ -183,7 +183,7 @@ modrinth {
 }
 
 githubRelease {
-    token = findProperty("GITHUB_TOKEN") ?: ""
+    token = GITHUB_TOKEN
     owner = "andersmmg"
     repo = project.archives_base_name
     draft = false
