@@ -90,11 +90,6 @@ public class AlarmTypeManager extends SimpleJsonResourceReloadListener {
         return order;
     }
 
-    /*
-    * Called on the client when the server sends the alarm type order, since the
-    * client's own reload listener never runs on a dedicated server (only the
-    * logical server reloads data pack resources).
-    */
     public void setClientOrder(List<ResourceLocation> order) {
         this.order = List.copyOf(order);
     }
