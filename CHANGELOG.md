@@ -12,6 +12,12 @@
 
 ### Fixed
 
+## [0.2.2] - 2026-10-03
+
+### Fixed
+
+- Properly sync alarm types on multiplayer
+
 ## [0.2.1] - 2026-07-27
 
 ### Added
@@ -49,8 +55,8 @@
 
 - Initial release!
 
-[Unreleased]: https://github.com/andersmmg/CreateAlerted/compare/v0.2.1...HEAD
-
+[Unreleased]: https://github.com/andersmmg/CreateAlerted/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/andersmmg/CreateAlerted/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/andersmmg/CreateAlerted/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/andersmmg/CreateAlerted/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/andersmmg/CreateAlerted/compare/v0.1.0...v0.1.1
